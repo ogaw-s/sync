@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\\\Users\\\\d257b\\\\Desktop\" /b)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\d257b\\\\Desktop\\\\omlethp\" -Recurse -Depth 2)",
+      "Bash(Select-Object FullName)",
+      "Bash(exiftool:*)",
+      "Bash(cmd /c \"where exiftool\")",
+      "Bash(powershell -Command \"Get-Command exiftool -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

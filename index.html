@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sync</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #111;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #members {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .member {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #333;
+    }
+    .member.ready { background: #4f4; }
+    .member.me { box-shadow: 0 0 0 2px #fff; }
+    #countdown {
+      font-size: 80px;
+      font-weight: bold;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #status {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 24px;
+    }
+    .buttons { display: flex; gap: 12px; }
+    button {
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.3; cursor: not-allowed; }
+    #readyBtn { background: #333; color: #fff; }
+    #readyBtn.ready { background: #4f4; color: #000; }
+    #startBtn { background: #f44; color: #fff; }
+    #stopBtn { background: #666; color: #fff; display: none; }
+    #stopBtn.active { display: block; }
+  </style>
+</head>
+<body>
+  <div id="members"></div>
+  <div id="countdown"></div>
+  <div id="status">--</div>
+  <div class="buttons">
+    <button id="readyBtn" disabled>Ready</button>
+    <button id="startBtn" disabled>Start</button>
+    <button id="stopBtn">Stop</button>
+  </div>
+  <script src="client.js"></script>
+</body>
+</html>
