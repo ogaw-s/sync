@@ -92,8 +92,8 @@ export class Room {
   }
 
   private handleStart(): void {
-    const startAt = Date.now() + 3000;
-    const message = JSON.stringify({ type: 'play', startAt });
+    
+    const message = JSON.stringify({ type: 'countdown' });
     this.broadcast(message);
   }
 

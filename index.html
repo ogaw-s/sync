@@ -58,6 +58,26 @@
     #startBtn { background: #f44; color: #fff; }
     #stopBtn { background: #666; color: #fff; display: none; }
     #stopBtn.active { display: block; }
+    #tapBtn {
+      display: none;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: #4f4;
+      color: #000;
+      font-size: 48px;
+      font-weight: bold;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: pulse 0.5s infinite;
+    }
+    #tapBtn.active { display: flex; align-items: center; justify-content: center; }
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.1); }
+    }
   </style>
 </head>
 <body>
@@ -69,6 +89,7 @@
     <button id="startBtn" disabled>Start</button>
     <button id="stopBtn">Stop</button>
   </div>
+  <button id="tapBtn">TAP!</button>
   <script src="client.js"></script>
 </body>
 </html>

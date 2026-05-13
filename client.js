@@ -11,6 +11,7 @@ const countdown = document.getElementById('countdown');
 const readyBtn = document.getElementById('readyBtn');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
+const tapBtn = document.getElementById('tapBtn');
 
 async function init() {
   status.textContent = 'Loading audio...';
@@ -44,7 +45,7 @@ function connectWebSocket() {
 function handleMessage(msg) {
   if (msg.type === 'welcome') myClientId = msg.clientId;
   if (msg.type === 'status') updateMembers(msg.clients);
-  if (msg.type === 'play') schedulePlayback(msg.startAt);
+  if (msg.type === 'countdown') startCountdown();
 }
 
 function updateMembers(clients) {
@@ -57,7 +58,6 @@ function updateMembers(clients) {
   startBtn.disabled = !(clients.length > 0 && clients.every(c => c.ready) && isReady);
 }
 
-// Readyの段階でSourceNodeを事前に作成しておく
 function prepareSourceNode() {
   if (sourceNode) {
     try { sourceNode.disconnect(); } catch {}
@@ -68,29 +68,32 @@ function prepareSourceNode() {
   sourceNode.onended = stopPlayback;
 }
 
-function schedulePlayback(startAt) {
-  const delay = startAt - Date.now();
-  if (delay <= 0) return playAudio();
-
-  let sec = Math.ceil(delay / 1000);
+function startCountdown() {
+  readyBtn.disabled = true;
+  startBtn.disabled = true;
+  
+  let sec = 3;
   countdown.textContent = sec;
+  
   const iv = setInterval(() => {
     sec--;
-    countdown.textContent = sec > 0 ? sec : '';
-    if (sec <= 0) clearInterval(iv);
+    if (sec > 0) {
+      countdown.textContent = sec;
+    } else {
+      clearInterval(iv);
+      countdown.textContent = '';
+      showTapButton();
+    }
   }, 1000);
-
-  // カウントダウンと同じDate.now()ベースで再生開始
-  setTimeout(() => {
-    sourceNode.start(0);
-    stopBtn.classList.add('active');
-    readyBtn.disabled = true;
-    startBtn.disabled = true;
-  }, delay);
 }
 
-function playAudio() {
-  sourceNode.start();
+function showTapButton() {
+  tapBtn.classList.add('active');
+}
+
+function onTap() {
+  tapBtn.classList.remove('active');
+  sourceNode.start(0);
   stopBtn.classList.add('active');
 }
 
@@ -98,6 +101,7 @@ function stopPlayback() {
   if (sourceNode) try { sourceNode.stop(); } catch {}
   sourceNode = null;
   stopBtn.classList.remove('active');
+  tapBtn.classList.remove('active');
   countdown.textContent = '';
   isReady = false;
   readyBtn.textContent = 'Ready';
@@ -115,7 +119,6 @@ readyBtn.onclick = async () => {
   readyBtn.textContent = isReady ? 'Ready!' : 'Ready';
   readyBtn.classList.toggle('ready', isReady);
 
-  // Ready時にSourceNodeを事前準備
   if (isReady) {
     prepareSourceNode();
   } else {
@@ -130,5 +133,6 @@ readyBtn.onclick = async () => {
 
 startBtn.onclick = () => ws.send(JSON.stringify({ type: 'start' }));
 stopBtn.onclick = stopPlayback;
+tapBtn.onclick = onTap;
 
 init();
