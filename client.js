@@ -43,10 +43,9 @@ function connectWebSocket() {
 }
 
 function handleMessage(msg) {
-  console.log('Received:', msg);
   if (msg.type === 'welcome') myClientId = msg.clientId;
   if (msg.type === 'status') updateMembers(msg.clients);
-  if (msg.type === 'countdown') startCountdown();
+  if (msg.type === 'countdown') showTapButton();
 }
 
 function updateMembers(clients) {
@@ -69,30 +68,14 @@ function prepareSourceNode() {
   sourceNode.onended = stopPlayback;
 }
 
-function startCountdown() {
+function showTapButton() {
   readyBtn.disabled = true;
   startBtn.disabled = true;
-  
-  let sec = 3;
-  countdown.textContent = sec;
-  
-  const iv = setInterval(() => {
-    sec--;
-    if (sec > 0) {
-      countdown.textContent = sec;
-    } else {
-      clearInterval(iv);
-      countdown.textContent = '';
-      showTapButton();
-    }
-  }, 1000);
-}
-
-function showTapButton() {
   tapBtn.classList.add('active');
 }
 
 function onTap() {
+  if (!tapBtn.classList.contains('active')) return;
   tapBtn.classList.remove('active');
   sourceNode.start(0);
   stopBtn.classList.add('active');
@@ -135,5 +118,13 @@ readyBtn.onclick = async () => {
 startBtn.onclick = () => ws.send(JSON.stringify({ type: 'start' }));
 stopBtn.onclick = stopPlayback;
 tapBtn.onclick = onTap;
+
+// スペースキーでTAP
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' && tapBtn.classList.contains('active')) {
+    e.preventDefault();
+    onTap();
+  }
+});
 
 init();
