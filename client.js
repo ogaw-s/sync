@@ -43,6 +43,7 @@ function connectWebSocket() {
 }
 
 function handleMessage(msg) {
+  console.log('Received:', msg);
   if (msg.type === 'welcome') myClientId = msg.clientId;
   if (msg.type === 'status') updateMembers(msg.clients);
   if (msg.type === 'countdown') startCountdown();
