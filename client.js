@@ -69,17 +69,25 @@ function schedulePlayback(startAt) {
     if (sec <= 0) clearInterval(iv);
   }, 1000);
 
-  sourceNode = audioContext.createBufferSource();
-  sourceNode.buffer = audioBuffer;
-  sourceNode.connect(audioContext.destination);
-  sourceNode.onended = stopPlayback;
-  sourceNode.start(audioContext.currentTime + delay / 1000);
-
+  // 再生直前にSourceNodeを作成し、正確なタイミングで開始
+  const prepareTime = Math.max(0, delay - 50);
   setTimeout(() => {
+    sourceNode = audioContext.createBufferSource();
+    sourceNode.buffer = audioBuffer;
+    sourceNode.connect(audioContext.destination);
+    sourceNode.onended = stopPlayback;
+
+    const remaining = startAt - Date.now();
+    if (remaining <= 5) {
+      sourceNode.start(0);
+    } else {
+      sourceNode.start(audioContext.currentTime + remaining / 1000);
+    }
+
     stopBtn.classList.add('active');
     readyBtn.disabled = true;
     startBtn.disabled = true;
-  }, delay);
+  }, prepareTime);
 }
 
 function playAudio() {
