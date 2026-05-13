@@ -57,6 +57,17 @@ function updateMembers(clients) {
   startBtn.disabled = !(clients.length > 0 && clients.every(c => c.ready) && isReady);
 }
 
+// Readyの段階でSourceNodeを事前に作成しておく
+function prepareSourceNode() {
+  if (sourceNode) {
+    try { sourceNode.disconnect(); } catch {}
+  }
+  sourceNode = audioContext.createBufferSource();
+  sourceNode.buffer = audioBuffer;
+  sourceNode.connect(audioContext.destination);
+  sourceNode.onended = stopPlayback;
+}
+
 function schedulePlayback(startAt) {
   const delay = startAt - Date.now();
   if (delay <= 0) return playAudio();
@@ -69,32 +80,17 @@ function schedulePlayback(startAt) {
     if (sec <= 0) clearInterval(iv);
   }, 1000);
 
-  // 再生直前にSourceNodeを作成し、正確なタイミングで開始
-  const prepareTime = Math.max(0, delay - 50);
+  // SourceNodeは既にReadyで準備済み
+  sourceNode.start(audioContext.currentTime + delay / 1000);
+
   setTimeout(() => {
-    sourceNode = audioContext.createBufferSource();
-    sourceNode.buffer = audioBuffer;
-    sourceNode.connect(audioContext.destination);
-    sourceNode.onended = stopPlayback;
-
-    const remaining = startAt - Date.now();
-    if (remaining <= 5) {
-      sourceNode.start(0);
-    } else {
-      sourceNode.start(audioContext.currentTime + remaining / 1000);
-    }
-
     stopBtn.classList.add('active');
     readyBtn.disabled = true;
     startBtn.disabled = true;
-  }, prepareTime);
+  }, delay);
 }
 
 function playAudio() {
-  sourceNode = audioContext.createBufferSource();
-  sourceNode.buffer = audioBuffer;
-  sourceNode.connect(audioContext.destination);
-  sourceNode.onended = stopPlayback;
   sourceNode.start();
   stopBtn.classList.add('active');
 }
@@ -119,6 +115,17 @@ readyBtn.onclick = async () => {
   isReady = !isReady;
   readyBtn.textContent = isReady ? 'Ready!' : 'Ready';
   readyBtn.classList.toggle('ready', isReady);
+
+  // Ready時にSourceNodeを事前準備
+  if (isReady) {
+    prepareSourceNode();
+  } else {
+    if (sourceNode) {
+      try { sourceNode.disconnect(); } catch {}
+      sourceNode = null;
+    }
+  }
+
   ws.send(JSON.stringify({ type: isReady ? 'ready' : 'unready' }));
 };
 
