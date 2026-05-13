@@ -80,10 +80,9 @@ function schedulePlayback(startAt) {
     if (sec <= 0) clearInterval(iv);
   }, 1000);
 
-  // SourceNodeは既にReadyで準備済み
-  sourceNode.start(audioContext.currentTime + delay / 1000);
-
+  // カウントダウンと同じDate.now()ベースで再生開始
   setTimeout(() => {
+    sourceNode.start(0);
     stopBtn.classList.add('active');
     readyBtn.disabled = true;
     startBtn.disabled = true;
