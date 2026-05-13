@@ -5,6 +5,9 @@ let sourceNode = null;
 let myClientId = null;
 let isReady = false;
 
+let selectedSong = 'suisou';
+let selectedType = 'sync';
+
 const members = document.getElementById('members');
 const status = document.getElementById('status');
 const countdown = document.getElementById('countdown');
@@ -12,27 +15,44 @@ const readyBtn = document.getElementById('readyBtn');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const tapBtn = document.getElementById('tapBtn');
+const songSelector = document.getElementById('songSelector');
+const typeSelector = document.getElementById('typeSelector');
 
-async function init() {
+function getTrackUrl() {
+  return `tracks/${selectedSong}_${selectedType}.mp3`;
+}
+
+async function loadAudio() {
   status.textContent = 'Loading audio...';
+  readyBtn.disabled = true;
   try {
-    const response = await fetch('track.mp3');
+    const response = await fetch(getTrackUrl());
     if (!response.ok) throw new Error('Audio not found');
     const arrayBuffer = await response.arrayBuffer();
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
     audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    status.textContent = 'Connecting...';
-    connectWebSocket();
+    status.textContent = 'Connected';
+    readyBtn.disabled = false;
   } catch (e) {
-    status.textContent = 'Audio error';
+    status.textContent = 'Audio error: ' + getTrackUrl();
+    readyBtn.disabled = true;
   }
+}
+
+async function init() {
+  await loadAudio();
+  connectWebSocket();
 }
 
 function connectWebSocket() {
   ws = new WebSocket('wss://band-sync.d257bk512.workers.dev/ws');
   ws.onopen = () => {
-    status.textContent = 'Connected';
-    readyBtn.disabled = false;
+    if (audioBuffer) {
+      status.textContent = 'Connected';
+      readyBtn.disabled = false;
+    }
   };
   ws.onclose = () => {
     status.textContent = 'Disconnected';
@@ -105,6 +125,36 @@ function stopPlayback() {
     ws.send(JSON.stringify({ type: 'unready' }));
   }
 }
+
+// 曲選択
+songSelector.onclick = async (e) => {
+  if (!e.target.dataset.song) return;
+  songSelector.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+  e.target.classList.add('selected');
+  selectedSong = e.target.dataset.song;
+  if (isReady) {
+    isReady = false;
+    readyBtn.textContent = 'Ready';
+    readyBtn.classList.remove('ready');
+    ws.send(JSON.stringify({ type: 'unready' }));
+  }
+  await loadAudio();
+};
+
+// タイプ選択
+typeSelector.onclick = async (e) => {
+  if (!e.target.dataset.type) return;
+  typeSelector.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+  e.target.classList.add('selected');
+  selectedType = e.target.dataset.type;
+  if (isReady) {
+    isReady = false;
+    readyBtn.textContent = 'Ready';
+    readyBtn.classList.remove('ready');
+    ws.send(JSON.stringify({ type: 'unready' }));
+  }
+  await loadAudio();
+};
 
 readyBtn.onclick = async () => {
   if (audioContext?.state === 'suspended') await audioContext.resume();
