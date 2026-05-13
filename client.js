@@ -15,7 +15,7 @@ const stopBtn = document.getElementById('stopBtn');
 async function init() {
   status.textContent = 'Loading audio...';
   try {
-    const response = await fetch('track.wav');
+    const response = await fetch('track.mp3');
     if (!response.ok) throw new Error('Audio not found');
     const arrayBuffer = await response.arrayBuffer();
     audioContext = new (window.AudioContext || window.webkitAudioContext)();

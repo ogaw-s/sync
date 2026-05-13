@@ -9,7 +9,10 @@
       "Bash(powershell -Command \"Get-Command exiftool -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")",
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh run list:*)",
+      "Bash(git push:*)"
     ]
   }
 }
