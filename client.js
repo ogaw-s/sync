@@ -74,9 +74,18 @@ function showTapButton() {
   tapBtn.classList.add('active');
 }
 
-function onTap() {
+let isHolding = false;
+
+function onHold() {
   if (!tapBtn.classList.contains('active')) return;
-  tapBtn.classList.remove('active');
+  isHolding = true;
+  tapBtn.classList.add('holding');
+}
+
+function onRelease() {
+  if (!isHolding) return;
+  isHolding = false;
+  tapBtn.classList.remove('active', 'holding');
   sourceNode.start(0);
   stopBtn.classList.add('active');
 }
@@ -117,13 +126,24 @@ readyBtn.onclick = async () => {
 
 startBtn.onclick = () => ws.send(JSON.stringify({ type: 'start' }));
 stopBtn.onclick = stopPlayback;
-tapBtn.onclick = onTap;
 
-// スペースキーでTAP
+// マウス/タッチで押して離す
+tapBtn.onmousedown = onHold;
+tapBtn.onmouseup = onRelease;
+tapBtn.ontouchstart = (e) => { e.preventDefault(); onHold(); };
+tapBtn.ontouchend = onRelease;
+
+// スペースキーで押して離す
 document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space' && tapBtn.classList.contains('active')) {
+  if (e.code === 'Space' && tapBtn.classList.contains('active') && !e.repeat) {
     e.preventDefault();
-    onTap();
+    onHold();
+  }
+});
+document.addEventListener('keyup', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    onRelease();
   }
 });
 
